@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>AI勉強会ログ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="AI勉強会ログ">
+<meta property="og:url" content="http://yoursite.com/index.html">
+<meta property="og:site_name" content="AI勉強会ログ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AI勉強会ログ">
+  
+    <link rel="alternate" href="/atom.xml" title="AI勉強会ログ" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">AI勉強会ログ</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-epsilon-greedy" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/25/epsilon-greedy/" class="article-date">
+  <time datetime="2017-04-25T00:44:18.000Z" itemprop="datePublished">2017-04-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/04/25/epsilon-greedy/">epsilon-greedy</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="問題設定">問題設定</h2>
+<p>あるスロットマシンには腕が<span class="math inline">\(K\)</span>本あり、腕<span class="math inline">\(i\)</span>を引くとそれぞれ<span class="math inline">\(p_i\)</span>の確率で報酬が支払われる。プレーヤーは事前に確率<span class="math inline">\(p_k\)</span>を知らないので、試行を何回か繰り返して最適な腕（最も当たりが出やすい腕）を知りたい。</p>
+<p>単純なのは、任意の自然数<span class="math inline">\(n\)</span>をパラメータとして持つ次のような方法である。</p>
+<dl>
+<dt>Greedy Algorithm</dt>
+<dd><p>まだ<span class="math inline">\(n\)</span>回選んだことがない腕があればそれらから選ぶ。</p>
+</dd>
+<dd><p>それ以外の場合、これまでの報酬の平均を計算して<span class="math inline">\(u_i\)</span>が最大の腕を選ぶ</p>
+<p><span class="math inline">\(u_i = \frac{これまで腕iから得られた報酬の和}{これまで腕iを選んだ回数}\)</span></p>
+</dd>
+</dl>
+<p>ただしこの方針を取ると、本来は<span class="math inline">\(p\)</span>が最大の腕を選んだ結果が真の支払い率よりも悪かった場合、ずっと他の腕を引き続けてしまう可能性がある（局所解にはまり込む）。これを避けるために、確率 <span class="math inline">\(\varepsilon\)</span>でランダムに腕を選ぶように方針を修正する。</p>
+<dl>
+<dt>Epsilon Greedy Algorithm</dt>
+<dd><p>全ての腕を少なくとも1回は選ぶ</p>
+</dd>
+<dd><p>確率 <span class="math inline">\(\varepsilon\)</span> でランダムに腕を選ぶ</p>
+</dd>
+<dd><p>確率 1 - <span class="math inline">\(\varepsilon\)</span>で<span class="math inline">\(u_i\)</span>が最大の腕を選ぶ</p>
+</dd>
+</dl>
+<p><span class="math inline">\(\varepsilon\)</span>が大きければ大きいほど報酬の平均に関係なく色々な腕を試すようになる。</p>
+<h2 id="pythonで実装">Pythonで実装</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</div><div class="line"><span class="keyword">import</span> typing</div><div class="line"></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Arm</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(</span></span></div><div class="line">        self, index: int, prob: float, reward: float=<span class="number">.0</span></div><div class="line">    ) -&gt; <span class="keyword">None</span>:</div><div class="line">        self.index = index</div><div class="line">        self.prob = prob</div><div class="line">        self.reward = reward <span class="keyword">or</span> <span class="number">1.0</span></div><div class="line">        self.count = <span class="number">0</span></div><div class="line">        self.total_reward = <span class="number">.0</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">e_value</span><span class="params">(self)</span> -&gt; float:</span></div><div class="line">        <span class="keyword">return</span> self.total_reward / self.count <span class="keyword">if</span> self.count &gt; <span class="number">0</span> <span class="keyword">else</span> <span class="number">0</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">add_total_reward</span><span class="params">(self)</span> -&gt; <span class="keyword">None</span>:</span></div><div class="line">        self.total_reward += self.reward</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__str__</span><span class="params">(self)</span> -&gt; str:</span></div><div class="line">        <span class="keyword">return</span> <span class="string">'arm &#123;&#125; = probability: &#123;&#125;, total reward: &#123;&#125;, count: &#123;&#125;'</span> \</div><div class="line">            .format(self.index, self.prob, self.total_reward, self.count)</div><div class="line"></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">EpsilonGreedy</span>:</span></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, eps: float, arms: typing.List[Arm], n: int=<span class="number">1</span>)</span> -&gt; <span class="keyword">None</span>:</span></div><div class="line">      <span class="keyword">if</span> eps &gt; <span class="number">1</span> <span class="keyword">or</span> eps &lt; <span class="number">0</span>:</div><div class="line">          <span class="keyword">raise</span> ValueError(<span class="string">'eps must satisfy the condition: 0 &lt;= eps &lt;= 1.'</span>)</div><div class="line">      self.eps = eps</div><div class="line">      self.arms = arms</div><div class="line">      self.n = n</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">get_max_arm</span><span class="params">(self)</span> -&gt; Arm:</span></div><div class="line">      expected_values = [a.e_value() <span class="keyword">for</span> a <span class="keyword">in</span> self.arms]</div><div class="line">      argmax = np.argmax(expected_values)</div><div class="line">      <span class="keyword">return</span> self.arms[argmax]</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">select_arm</span><span class="params">(self)</span> -&gt; Arm:</span></div><div class="line">      <span class="keyword">if</span> [a <span class="keyword">for</span> a <span class="keyword">in</span> self.arms <span class="keyword">if</span> a.count &lt; self.n]:</div><div class="line">          unselected_indices = [</div><div class="line">              a.index <span class="keyword">for</span> a <span class="keyword">in</span> self.arms <span class="keyword">if</span> a.count &lt; self.n]</div><div class="line">          arm = self.arms[np.random.choice(unselected_indices)]</div><div class="line"></div><div class="line">      <span class="keyword">elif</span> np.random.rand() &lt; self.eps:</div><div class="line">          arm = np.random.choice(self.arms)</div><div class="line"></div><div class="line">      <span class="keyword">else</span>:</div><div class="line">          arm = self.get_max_arm()</div><div class="line"></div><div class="line">      arm.count += <span class="number">1</span></div><div class="line"></div><div class="line">      <span class="keyword">if</span> np.random.rand() &lt; arm.prob:</div><div class="line">          arm.add_total_reward()</div><div class="line"></div><div class="line">      <span class="keyword">return</span> arm</div></pre></td></tr></table></figure>
+<h2 id="結果">結果</h2>
+<p><span class="math inline">\(\varepsilon=0\)</span>とすると、epsilon greedyはgreedyの<span class="math inline">\(n=1\)</span>の場合の特殊例になる。以下は<span class="math inline">\(\varepsilon\)</span>を変化させて試行を1000回繰り返した結果である。上の例では運悪く局所解にはまり込んでいる。</p>
+<h6 id="varepsilon-0"><span class="math inline">\(\varepsilon = 0\)</span></h6>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">epoch 1000</div><div class="line">  arm 0 = probability: 0.1, total reward: 78.0, count: 996</div><div class="line">  arm 1 = probability: 0.2, total reward: 0.0, count: 1</div><div class="line">  arm 2 = probability: 0.3, total reward: 0.0, count: 1</div><div class="line">  arm 3 = probability: 0.4, total reward: 0.0, count: 1</div><div class="line">  arm 4 = probability: 0.5, total reward: 0.0, count: 1</div></pre></td></tr></table></figure>
+<h6 id="varepsilon-0.1"><span class="math inline">\(\varepsilon = 0.1\)</span></h6>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">epoch 1000</div><div class="line">  arm 0 = probability: 0.1, total reward: 2.0, count: 17</div><div class="line">  arm 1 = probability: 0.2, total reward: 4.0, count: 26</div><div class="line">  arm 2 = probability: 0.3, total reward: 8.0, count: 25</div><div class="line">  arm 3 = probability: 0.4, total reward: 7.0, count: 21</div><div class="line">  arm 4 = probability: 0.5, total reward: 460.0, count: 911</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/04/25/epsilon-greedy/" data-id="cj1wtzaor0000y0zbj7xrt1qk" class="article-share-link">Delen</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archieven</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recente berichten</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/04/25/epsilon-greedy/">epsilon-greedy</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Realglobe, Inc<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+</body>
+</html>
